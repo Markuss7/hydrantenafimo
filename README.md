@@ -5,7 +5,7 @@ Interaktive Karte zur Visualisierung von 353 Feuerwehr-Hydranten im Nürnberger 
 ## Projektstruktur
 
 ```
-├── Assets/                  # Quelldaten & Spezifikation
+├── Assets/                  # Neu Quelldaten & Spezifikation
 │   ├── 260301-Hydranten-…-formatiert.csv
 │   └── Hydranten_Spec.md
 ├── backend/                 # FastAPI-Server
