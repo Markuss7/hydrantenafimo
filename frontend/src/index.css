@@ -1,0 +1,522 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Leaflet container must fill the screen */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Hide default Leaflet controls – we use custom ones */
+.leaflet-control-zoom,
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* ─── Pulse animation for GPS FAB ─── */
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  70%  { transform: scale(1.45); opacity: 0; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* ─── Filter Pill Bar ─── */
+.pill-bar {
+  position: absolute;
+  top: 88px;
+  left: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 0;
+}
+
+.pill-bar button {
+  border: 1px solid rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.9);
+  border-radius: 999px;
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1f1f1f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
+}
+
+.pill-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.pill-dot.dot-all {
+  background: #9e9e9e;
+}
+
+.pill-dot.dot-gh {
+  background: #43a047;
+}
+
+.pill-dot.dot-oh {
+  background: #ff2b2b;
+}
+
+.pill-dot.dot-uh {
+  background: #1ea0de;
+}
+
+.pill-bar button.active-all {
+  border-color: transparent;
+  background: #4469e1;
+  color: #fff;
+}
+.pill-bar button.active-oh {
+  border-color: rgba(255, 43, 43, 0.28);
+  background: rgba(255, 255, 255, 0.96);
+  color: #242424;
+}
+.pill-bar button.active-uh {
+  border-color: rgba(30, 160, 222, 0.28);
+  background: rgba(255, 255, 255, 0.96);
+  color: #242424;
+}
+.pill-bar button.active-gh {
+  border-color: rgba(67, 160, 71, 0.4);
+  background: rgba(255, 255, 255, 0.96);
+  color: #242424;
+}
+
+.top-search-wrap {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  z-index: 2100;
+}
+
+.top-search-field {
+  height: 60px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #626262;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  font-size: 22px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(22, 22, 22, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ─── Version Badge ─── */
+.version-badge {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 2px);
+  right: 10px;
+  z-index: 3000;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.8);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── Zoom Controls ─── */
+.zoom-controls-wrap {
+  position: absolute;
+  right: 16px;
+  bottom: 220px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: bottom 0.2s ease;
+}
+
+.rings-toggle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #757575;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  transition: background 0.2s, color 0.2s;
+}
+
+.rings-toggle.active {
+  background: #E3F2FD;
+  color: #1565C0;
+}
+
+.zoom-controls {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.zoom-controls button {
+  width: 56px;
+  height: 56px;
+  border: none;
+  background: #fff;
+  font-size: 36px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.zoom-controls button:hover {
+  background: #f5f5f5;
+}
+
+.zoom-controls button:first-child {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* ─── GPS FAB ─── */
+.gps-fab-wrapper {
+  position: absolute;
+  right: 12px;
+  bottom: 150px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: bottom 0.2s ease;
+  width: 82px;
+}
+
+.gps-fab {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: #1272f7;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 9px 18px rgba(0, 82, 204, 0.34);
+  transition: opacity 0.2s;
+}
+
+.gps-fab.disabled {
+  opacity: 0.45;
+}
+
+.gps-fab .pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #1A73E8;
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+.gps-fab-label {
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(0,0,0,0.88);
+  user-select: none;
+}
+
+/* ─── Footer Card ─── */
+.footer-card {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 26px rgba(0,0,0,0.16);
+  padding: 12px 22px 18px;
+  min-height: 188px;
+  transition: transform 0.16s ease-out;
+  touch-action: none;
+}
+
+.footer-card.is-expanded {
+  min-height: 328px;
+}
+
+.footer-card.is-closed {
+  pointer-events: none;
+}
+
+.footer-close-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  color: #444;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-handle {
+  width: 64px;
+  height: 7px;
+  border-radius: 2px;
+  background: #ccc;
+  margin: 0 auto 14px;
+}
+
+.footer-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.footer-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.footer-caption {
+  font-size: 12px;
+  font-weight: 500;
+  color: #5f6368;
+  line-height: 1.15;
+  margin-bottom: 8px;
+  letter-spacing: 0.2px;
+}
+
+.footer-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #151515;
+  line-height: 1.02;
+  margin-bottom: 6px;
+}
+
+.footer-title.uh { color: #1E88E5; }
+.footer-title.oh { color: #111111; }
+.footer-title.gh { color: #43A047; }
+.footer-title.twb { color: #FB8C00; }
+
+.footer-address {
+  font-size: 20px;
+  font-weight: 500;
+  color: #121212;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin-left: 16px;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+
+.footer-metric-chip {
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #E3F2FD;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1565C0;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.footer-submetric-chip {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #F1F3F4;
+  font-size: 15px;
+  font-weight: 600;
+  color: #3C4043;
+  text-align: center;
+}
+
+.footer-extra {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #E8EAED;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-extra-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.footer-extra-row strong {
+  color: #202124;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.footer-extra-divider {
+  margin: 2px 0;
+  border-bottom: 1px solid #E8EAED;
+}
+
+.next-hydrant-cta {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  transform: translateX(-50%);
+  z-index: 2100;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 22px;
+  background: #1e67f0;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(16, 74, 196, 0.34);
+  cursor: pointer;
+}
+
+/* ─── iOS Compass Toast ─── */
+.compass-toast {
+  position: absolute;
+  bottom: 135px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeIn 0.3s ease;
+}
+
+@media (max-width: 760px) {
+  .version-badge {
+    font-size: 12px;
+  }
+
+  .top-search-field {
+    font-size: 14px;
+    height: 52px;
+    border-radius: 26px;
+  }
+
+  .pill-bar {
+    top: 78px;
+    left: 12px;
+    right: 12px;
+    gap: 8px;
+  }
+
+  .pill-bar button {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .gps-fab {
+    width: 62px;
+    height: 62px;
+  }
+
+  .gps-fab-wrapper {
+    width: 70px;
+    right: 10px;
+  }
+
+  .gps-fab-label {
+    font-size: 11px;
+  }
+
+  .footer-title {
+    font-size: 30px;
+    line-height: 1.02;
+  }
+
+  .footer-address {
+    font-size: 18px;
+  }
+
+  .footer-metric-chip {
+    font-size: 24px;
+    padding: 8px 14px;
+  }
+
+  .footer-submetric-chip {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .footer-extra-row {
+    font-size: 12px;
+  }
+
+  .footer-extra-row strong {
+    font-size: 13px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
