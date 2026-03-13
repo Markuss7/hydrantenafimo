@@ -1,5 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_URL || '';
-const LOCAL_ASSETS = '/hydrants.json';
+const LOCAL_ASSETS = `${import.meta.env.BASE_URL || '/'}hydrants.json`;
 
 function buildApiUrl(path, params = null) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
