@@ -45,6 +45,27 @@ npm run dev
 Die App ist dann unter **http://localhost:5173** erreichbar.  
 Das Frontend proxied `/api/*`-Requests automatisch an den Backend-Server auf Port 8000.
 
+### GitHub Pages Deployment
+
+1. In `frontend/vite.config.js` ist `base` auf `/hydrantenafimo/` gesetzt (Repo-Name) und `build.outDir` auf `../docs`.
+2. Build erstellen:
+
+```bash
+cd frontend
+npm run build
+```
+
+3. Auf `main` committen und pushen (GitHub Pages Source: `main` branch, `docs/` Ordner):
+
+```bash
+git add docs frontend/vite.config.js frontend/package.json README.md
+git commit -m "Prepare GitHub Pages deployment"
+git push origin main
+```
+
+4. GitHub Repo Settings -> Pages -> Branch: `main`, Ordner: `/docs` -> Speichern.
+5. Öffne `https://Markuss7.github.io/01` nach ein paar Minuten.
+
 ## API-Endpunkte
 
 | Endpunkt | Beschreibung |
