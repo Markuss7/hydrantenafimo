@@ -34,6 +34,12 @@ html, body, #root {
   100% { transform: scale(1.45); opacity: 0; }
 }
 
+@keyframes gps-dot-pulse {
+  0%   { transform: scale(1);   opacity: 0.5; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
 /* ─── Filter Pill Bar ─── */
 .pill-bar {
   position: absolute;
@@ -65,6 +71,16 @@ html, body, #root {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
 }
 
+.pill-bar button.filter-active {
+  border-color: transparent;
+  background: #4469e1;
+  color: #fff;
+}
+
+.pill-bar button.filter-active .pill-dot {
+  border: 2px solid #fff;
+}
+
 .pill-dot {
   width: 12px;
   height: 12px;
@@ -87,32 +103,13 @@ html, body, #root {
   background: #1ea0de;
 }
 
-.pill-bar button.active-all {
-  border-color: transparent;
-  background: #4469e1;
-  color: #fff;
-}
-.pill-bar button.active-oh {
-  border-color: rgba(255, 43, 43, 0.28);
-  background: rgba(255, 255, 255, 0.96);
-  color: #242424;
-}
-.pill-bar button.active-uh {
-  border-color: rgba(30, 160, 222, 0.28);
-  background: rgba(255, 255, 255, 0.96);
-  color: #242424;
-}
-.pill-bar button.active-gh {
-  border-color: rgba(67, 160, 71, 0.4);
-  background: rgba(255, 255, 255, 0.96);
-  color: #242424;
-}
-
 .top-search-wrap {
   position: absolute;
   top: 18px;
-  left: 20px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: calc(100% - 40px);
   z-index: 2100;
 }
 
@@ -160,8 +157,8 @@ html, body, #root {
 }
 
 .rings-toggle {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
   background: #fff;
@@ -289,10 +286,13 @@ html, body, #root {
 }
 
 .gps-fab-label {
-  font-size: 20px;
+  font-size: 13px;
   line-height: 1;
   font-family: 'DM Sans', sans-serif;
-  color: rgba(0,0,0,0.88);
+  font-weight: 700;
+  color: #000;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff,
+    0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff;
   user-select: none;
 }
 
@@ -306,14 +306,25 @@ html, body, #root {
   background: #fff;
   border-radius: 22px 22px 0 0;
   box-shadow: 0 -8px 26px rgba(0,0,0,0.16);
-  padding: 12px 22px 18px;
+  padding: 12px 22px 10px;
   min-height: 188px;
   transition: transform 0.16s ease-out;
   touch-action: none;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.footer-card:active {
+  cursor: grabbing;
 }
 
 .footer-card.is-expanded {
-  min-height: 328px;
+  min-height: 100%;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .footer-card.is-closed {
@@ -322,8 +333,8 @@ html, body, #root {
 
 .footer-close-btn {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 10px;
+  right: 12px;
   width: 32px;
   height: 32px;
   border: none;
@@ -351,6 +362,7 @@ html, body, #root {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .footer-left {
@@ -376,9 +388,19 @@ html, body, #root {
 }
 
 .footer-title.uh { color: #1E88E5; }
-.footer-title.oh { color: #111111; }
+.footer-title.oh { color: #E53935; }
 .footer-title.gh { color: #43A047; }
 .footer-title.twb { color: #FB8C00; }
+
+.footer-type-badge {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.footer-type-badge.oh {
+  color: #E53935;
+}
 
 .footer-address {
   font-size: 20px;
@@ -396,7 +418,8 @@ html, body, #root {
   align-items: flex-end;
   gap: 8px;
   margin-left: 16px;
-  margin-right: 24px;
+  margin-right: 0;
+  margin-top: 20px;
   flex-shrink: 0;
 }
 
@@ -422,12 +445,13 @@ html, body, #root {
 }
 
 .footer-extra {
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 1px solid #E8EAED;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
+  flex: 1;
 }
 
 .footer-extra-row {
@@ -443,6 +467,7 @@ html, body, #root {
   color: #202124;
   font-size: 14px;
   font-weight: 600;
+  text-align: right;
 }
 
 .footer-extra-divider {
@@ -491,6 +516,11 @@ html, body, #root {
     font-size: 12px;
   }
 
+  .top-search-wrap {
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+  }
+
   .top-search-field {
     font-size: 14px;
     height: 52px;
@@ -526,7 +556,7 @@ html, body, #root {
 
   .gps-fab-secondary-label,
   .gps-fab-label {
-    font-size: 18px;
+    font-size: 12px;
   }
 
   .footer-title {

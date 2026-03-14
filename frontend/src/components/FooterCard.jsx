@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { TYPE_CONFIG } from '../utils';
+import { TYPE_CONFIG, formatDistance } from '../utils';
 
 export default function FooterCard({
   hydrant,
@@ -72,9 +72,11 @@ export default function FooterCard({
     ref: cardRef,
     className: `footer-card ${isOpen ? '' : 'is-closed'} ${isExpanded ? 'is-expanded' : ''}`.trim(),
     style: { transform: cardTransform },
+    onMouseDown: (e) => { if (!e.target.closest('.footer-close-btn')) beginDrag(e.clientY); },
     onMouseMove: (e) => updateDrag(e.clientY),
     onMouseUp: endDrag,
     onMouseLeave: endDrag,
+    onTouchStart: (e) => { if (!e.target.closest('.footer-close-btn')) beginDrag(e.touches[0].clientY); },
     onTouchMove: (e) => updateDrag(e.touches[0].clientY),
     onTouchEnd: endDrag,
   };
@@ -92,12 +94,7 @@ export default function FooterCard({
         <button className="footer-close-btn" onClick={() => onClose?.()} aria-label="Bottom Sheet schliessen">
           ×
         </button>
-        <div
-          className="footer-handle"
-          onMouseDown={(e) => beginDrag(e.clientY)}
-          onTouchStart={(e) => beginDrag(e.touches[0].clientY)}
-          onClick={() => onExpandedChange?.(!isExpanded)}
-        />
+        <div className="footer-handle" />
         <div className="footer-content">
           <div className="footer-left">
             <div className="footer-caption">Nächster Hydrant</div>
@@ -123,21 +120,18 @@ export default function FooterCard({
       <button className="footer-close-btn" onClick={() => onClose?.()} aria-label="Bottom Sheet schliessen">
         ×
       </button>
-      <div
-        className="footer-handle"
-        onMouseDown={(e) => beginDrag(e.clientY)}
-        onTouchStart={(e) => beginDrag(e.touches[0].clientY)}
-        onClick={() => onExpandedChange?.(!isExpanded)}
-      />
+      <div className="footer-handle" />
       <div className="footer-content">
         <div className="footer-left">
           <div className="footer-caption">Nächster Hydrant</div>
-          <div className={`footer-title ${hydrant.typ.toLowerCase()}`}>{cfg.label}</div>
+          <div className={`footer-title ${hydrant.typ.toLowerCase()}`}>
+            {cfg.label}
+          </div>
           <div className="footer-address">{addr || '—'}</div>
         </div>
         <div className="footer-right">
           {distance != null && (
-            <div className="footer-metric-chip">{Math.round(distance)} m</div>
+            <div className="footer-metric-chip">{formatDistance(distance)}</div>
           )}
           {hoseCount != null && (
             <div className="footer-submetric-chip">{hoseCount} x 20m</div>
@@ -147,6 +141,10 @@ export default function FooterCard({
 
       {isExpanded && (
         <div className="footer-extra">
+          <div className="footer-extra-row">
+            <span>Schlauche à 20m</span>
+            <strong>{hoseCount != null ? `${hoseCount} x 20m` : '—'}</strong>
+          </div>
           <div className="footer-extra-row">
             <span>Nennweite</span>
             <strong>{nennweite === '—' ? '—' : `${nennweite} mm`}</strong>

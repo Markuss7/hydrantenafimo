@@ -15,7 +15,7 @@ const DEFAULT_CENTER = [49.405, 11.178];
 const DEFAULT_ZOOM = 15;
 
 /* ─── Distance rings (metres) ─── */
-const RING_DISTANCES = [20, 40, 60, 80, 100];
+const RING_DISTANCES = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200];
 
 /* ─── Sub-component that syncs map to imperative commands ─── */
 function MapController({ mapRef }) {
@@ -35,16 +35,16 @@ function HeadingCone({ position, heading }) {
 
     const icon = L.divIcon({
       className: '',
-      iconSize: [90, 90],
-      iconAnchor: [45, 45],
-      html: `<svg width="90" height="90" viewBox="0 0 90 90" style="transform:rotate(${heading}deg);transform-origin:center;">
+      iconSize: [120, 120],
+      iconAnchor: [60, 60],
+      html: `<svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(${heading}deg);transform-origin:center;">
         <defs>
           <radialGradient id="hcone" cx="50%" cy="100%" r="100%">
-            <stop offset="0%" stop-color="#1A73E8" stop-opacity="0.7"/>
+            <stop offset="0%" stop-color="#1A73E8" stop-opacity="0.8"/>
             <stop offset="100%" stop-color="#1A73E8" stop-opacity="0"/>
           </radialGradient>
         </defs>
-        <path d="M45,45 L25,0 L65,0 Z" fill="url(#hcone)"/>
+        <path d="M60,60 L35,5 L85,5 Z" fill="url(#hcone)"/>
       </svg>`,
     });
 
@@ -58,6 +58,37 @@ function HeadingCone({ position, heading }) {
       map.removeLayer(marker);
     };
   }, [map, position, heading]);
+
+  return null;
+}
+
+/* ─── GPS Pulse overlay (DivIcon for CSS animation) ─── */
+function GpsPulse({ position }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!position) return;
+
+    const icon = L.divIcon({
+      className: '',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      html: `<div style="width:40px;height:40px;position:relative">
+        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(26,115,232,0.35);animation:gps-dot-pulse 2s ease-out infinite"></div>
+      </div>
+      <style>@keyframes gps-dot-pulse{0%{transform:scale(1);opacity:.5}70%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}</style>`,
+    });
+
+    const marker = L.marker([position.lat, position.lng], {
+      icon,
+      interactive: false,
+      zIndexOffset: -200,
+    }).addTo(map);
+
+    return () => {
+      map.removeLayer(marker);
+    };
+  }, [map, position]);
 
   return null;
 }
@@ -284,6 +315,7 @@ export default function HydrantMap({
       )}
 
       {/* GPS position elements */}
+      <GpsPulse position={gpsPosition} />
       <GpsDot position={gpsPosition} />
       {showRings && <DistanceRings position={gpsPosition} />}
       {showRings && <RingLabels position={gpsPosition} />}

@@ -19,7 +19,29 @@ function App() {
   const [isFooterOpen, setIsFooterOpen] = useState(false);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
   const [sheetVisibleHeight, setSheetVisibleHeight] = useState(0);
-  const [showRings, setShowRings] = useState(true);
+  const [showRings, setShowRings] = useState(false);
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const demo = query.get('demo');
+
+    if (demo === 'rings') {
+      setShowRings(true);
+      setIsFooterOpen(false);
+      setSelectedHydrantId(null);
+    } else if (demo === 'selected') {
+      setIsFooterOpen(true);
+      setIsSheetExpanded(false);
+      setShowRings(true);
+    } else if (demo === 'expanded') {
+      setIsFooterOpen(true);
+      setIsSheetExpanded(true);
+      setShowRings(true);
+    } else if (demo === 'default') {
+      setShowRings(false);
+      setIsFooterOpen(false);
+    }
+  }, []);
 
   const { position: gpsPosition, hasFix } = useGps();
   const { heading, needsPermission, requestPermission } = useCompass();
@@ -34,6 +56,17 @@ function App() {
       .catch((err) => console.error('Failed to load hydrants:', err))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const demo = query.get('demo');
+
+    if (hydrants.length && demo === 'selected') {
+      setSelectedHydrantId(hydrants[0].id);
+      setIsFooterOpen(true);
+      setShowRings(true);
+    }
+  }, [hydrants]);
 
   // ── Show iOS compass toast if permission needed ──
   useEffect(() => {
