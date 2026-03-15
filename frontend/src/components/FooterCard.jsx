@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { TYPE_CONFIG, formatDistance } from '../utils';
 
 export default function FooterCard({
@@ -13,6 +13,24 @@ export default function FooterCard({
   const [dragY, setDragY] = useState(0);
   const dragStartY = useRef(null);
   const cardRef = useRef(null);
+  const addressRef = useRef(null);
+  const [collapsedMinHeight, setCollapsedMinHeight] = useState(null);
+
+  useLayoutEffect(() => {
+    const addr = addressRef.current;
+    const card = cardRef.current;
+    if (!addr || !card) return;
+    const measure = () => {
+      const cardRect = card.getBoundingClientRect();
+      const addrRect = addr.getBoundingClientRect();
+      setCollapsedMinHeight(addrRect.bottom - cardRect.top + addrRect.height + 10);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(addr);
+    ro.observe(card);
+    return () => ro.disconnect();
+  }, [hydrant]);
 
   const beginDrag = (clientY) => {
     dragStartY.current = clientY;
@@ -71,7 +89,7 @@ export default function FooterCard({
   const commonProps = {
     ref: cardRef,
     className: `footer-card ${isOpen ? '' : 'is-closed'} ${isExpanded ? 'is-expanded' : ''}`.trim(),
-    style: { transform: cardTransform },
+    style: { transform: cardTransform, ...(!isExpanded && collapsedMinHeight ? { minHeight: collapsedMinHeight } : {}) },
     onMouseDown: (e) => { if (!e.target.closest('.footer-close-btn')) beginDrag(e.clientY); },
     onMouseMove: (e) => updateDrag(e.clientY),
     onMouseUp: endDrag,
@@ -99,11 +117,10 @@ export default function FooterCard({
           <div className="footer-left">
             <div className="footer-caption">Nächster Hydrant</div>
             <div className="footer-title">Wird geladen…</div>
-            <div className="footer-address">—</div>
+            <div className="footer-address" ref={addressRef}>—</div>
           </div>
           <div className="footer-right">
             <div className="footer-metric-chip">-- m</div>
-            <div className="footer-submetric-chip">-- x 20m</div>
           </div>
         </div>
       </div>
@@ -127,14 +144,11 @@ export default function FooterCard({
           <div className={`footer-title ${hydrant.typ.toLowerCase()}`}>
             {cfg.label}
           </div>
-          <div className="footer-address">{addr || '—'}</div>
+          <div className="footer-address" ref={addressRef}>{addr || '—'}</div>
         </div>
         <div className="footer-right">
           {distance != null && (
             <div className="footer-metric-chip">{formatDistance(distance)}</div>
-          )}
-          {hoseCount != null && (
-            <div className="footer-submetric-chip">{hoseCount} x 20m</div>
           )}
         </div>
       </div>

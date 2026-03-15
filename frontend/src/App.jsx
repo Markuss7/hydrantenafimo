@@ -20,6 +20,13 @@ function App() {
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
   const [sheetVisibleHeight, setSheetVisibleHeight] = useState(0);
   const [showRings, setShowRings] = useState(false);
+  const [screenHeight, setScreenHeight] = useState(window.innerHeight);
+
+  useEffect(() => {
+    const onResize = () => setScreenHeight(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -234,6 +241,12 @@ function App() {
   const gpsBottom = sheetVisibleHeight + 24;
   const zoomBottom = gpsBottom + 210;
 
+  // Soft-hide zoom controls when bottom sheet pushes them into filter/search area
+  // Layout heights: rings-toggle 56px + gap 10px + zoom 113px = 179px total
+  const FILTER_BAR_BOTTOM = 152; // approx bottom of filter pill bar from screen top
+  const ringsHidden = (screenHeight - zoomBottom - 179) < FILTER_BAR_BOTTOM;
+  const zoomHidden  = (screenHeight - zoomBottom - 113) < FILTER_BAR_BOTTOM;
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <HydrantMap
@@ -257,6 +270,8 @@ function App() {
         bottom={zoomBottom}
         showRings={showRings}
         onToggleRings={() => setShowRings((v) => !v)}
+        ringsHidden={ringsHidden}
+        zoomHidden={zoomHidden}
       />
       <GpsFab hasFix={hasFix} onClick={handleCenterGps} bottom={gpsBottom} />
       <CompassToast visible={showCompassToast} />

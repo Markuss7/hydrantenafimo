@@ -35,16 +35,17 @@ function HeadingCone({ position, heading }) {
 
     const icon = L.divIcon({
       className: '',
-      iconSize: [120, 120],
-      iconAnchor: [60, 60],
-      html: `<svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(${heading}deg);transform-origin:center;">
+      iconSize: [180, 180],
+      iconAnchor: [90, 90],
+      html: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(${heading}deg);transform-origin:center;overflow:visible;">
         <defs>
-          <radialGradient id="hcone" cx="50%" cy="100%" r="100%">
-            <stop offset="0%" stop-color="#1A73E8" stop-opacity="0.8"/>
-            <stop offset="100%" stop-color="#1A73E8" stop-opacity="0"/>
-          </radialGradient>
+          <linearGradient id="hcg" gradientUnits="userSpaceOnUse" x1="90" y1="90" x2="90" y2="6">
+            <stop offset="0%" stop-color="#1A73E8" stop-opacity="0.62"/>
+            <stop offset="100%" stop-color="#1A73E8" stop-opacity="0.04"/>
+          </linearGradient>
         </defs>
-        <path d="M60,60 L35,5 L85,5 Z" fill="url(#hcone)"/>
+        <path d="M90,90 L34,6 L146,6 Z" fill="url(#hcg)" stroke="#1A73E8" stroke-opacity="0.45" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="90,2 80,22 100,22" fill="#1A73E8" opacity="0.95"/>
       </svg>`,
     });
 
@@ -214,6 +215,7 @@ export default function HydrantMap({
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
+      maxZoom={20}
       zoomControl={false}
       attributionControl={false}
       style={{ width: '100%', height: '100%' }}
@@ -222,7 +224,8 @@ export default function HydrantMap({
 
       <TileLayer
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        maxZoom={19}
+        maxNativeZoom={19}
+        maxZoom={20}
       />
 
       {/* Hydrant points */}

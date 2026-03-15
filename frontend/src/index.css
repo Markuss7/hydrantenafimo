@@ -51,6 +51,11 @@ html, body, #root {
   gap: 10px;
   overflow-x: auto;
   padding: 2px 0;
+  scrollbar-width: none;
+}
+
+.pill-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .pill-bar button {
@@ -250,10 +255,13 @@ html, body, #root {
 }
 
 .gps-fab-secondary-label {
-  font-size: 20px;
+  font-size: 13px;
   line-height: 1;
   font-family: 'DM Sans', sans-serif;
-  color: rgba(0, 0, 0, 0.88);
+  font-weight: 700;
+  color: #000;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff,
+    0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff;
   user-select: none;
 }
 
