@@ -238,7 +238,11 @@ function App() {
     focusHydrantOnMap(nearestResult.hydrant, { includeGps: true, openSheet: true });
   }, [nearestResult.hydrant, focusHydrantOnMap]);
 
-  const gpsBottom = sheetVisibleHeight + 24;
+  // When the CTA button is visible, align the bottom of the GPS circle with the CTA top.
+  // CTA: bottom≈14px, height≈48px → top≈62px. GPS circle bottom = gpsBottom + label(13) + gap(10) = gpsBottom+23.
+  // gpsBottom = 62 - 23 = 39.
+  const ctaVisible = !isFooterOpen && !!nearestResult.hydrant;
+  const gpsBottom = ctaVisible ? 39 : sheetVisibleHeight + 24;
   const zoomBottom = gpsBottom + 210;
 
   // Soft-hide zoom controls when bottom sheet pushes them into filter/search area

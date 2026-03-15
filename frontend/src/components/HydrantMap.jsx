@@ -37,15 +37,16 @@ function HeadingCone({ position, heading }) {
       className: '',
       iconSize: [180, 180],
       iconAnchor: [90, 90],
-      html: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(${heading}deg);transform-origin:center;overflow:visible;">
+      html: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" style="display:block;background:transparent;transform:rotate(${heading}deg);transform-origin:center;">
         <defs>
           <linearGradient id="hcg" gradientUnits="userSpaceOnUse" x1="90" y1="90" x2="90" y2="6">
-            <stop offset="0%" stop-color="#1A73E8" stop-opacity="0.62"/>
-            <stop offset="100%" stop-color="#1A73E8" stop-opacity="0.04"/>
+            <stop offset="0%"   stop-color="#1A73E8" stop-opacity="0.0"/>
+            <stop offset="35%"  stop-color="#1A73E8" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#1A73E8" stop-opacity="0.70"/>
           </linearGradient>
         </defs>
-        <path d="M90,90 L34,6 L146,6 Z" fill="url(#hcg)" stroke="#1A73E8" stroke-opacity="0.45" stroke-width="1.5" stroke-linejoin="round"/>
-        <polygon points="90,2 80,22 100,22" fill="#1A73E8" opacity="0.95"/>
+        <path d="M90,90 L34,6 L146,6 Z" fill="url(#hcg)" stroke="#1A73E8" stroke-opacity="0.35" stroke-width="1" stroke-linejoin="round"/>
+        <polygon points="90,2 80,22 100,22" fill="#1A73E8" opacity="0.9"/>
       </svg>`,
     });
 
@@ -74,10 +75,9 @@ function GpsPulse({ position }) {
       className: '',
       iconSize: [40, 40],
       iconAnchor: [20, 20],
-      html: `<div style="width:40px;height:40px;position:relative">
+      html: `<div style="width:40px;height:40px;position:relative;background:transparent">
         <div style="position:absolute;inset:0;border-radius:50%;background:rgba(26,115,232,0.35);animation:gps-dot-pulse 2s ease-out infinite"></div>
-      </div>
-      <style>@keyframes gps-dot-pulse{0%{transform:scale(1);opacity:.5}70%{transform:scale(2.2);opacity:0}100%{transform:scale(2.2);opacity:0}}</style>`,
+      </div>`,
     });
 
     const marker = L.marker([position.lat, position.lng], {
