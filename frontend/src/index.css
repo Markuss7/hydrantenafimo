@@ -330,7 +330,7 @@ html, body, #root {
 }
 
 .footer-card.is-expanded {
-  min-height: 100%;
+  min-height: auto;
   padding-top: 20px;
   padding-bottom: 20px;
 }
