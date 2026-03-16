@@ -1,10 +1,10 @@
 /** Colour palette and label mapping for hydrant types. */
 
 export const TYPE_CONFIG = {
-  UH: { color: '#1E88E5', label: 'Unterflurhydrant' },
-  OH: { color: '#E53935', label: 'Überflurhydrant' },
-  GH: { color: '#43A047', label: 'Fallmantelhydrant' },
-  TWB: { color: '#FB8C00', label: 'Trinkwasserbrunnen' },
+  UH: { color: '#1E88E5', label: 'Unterflurhydrant',   labelShort: 'Unterflur H.' },
+  OH: { color: '#E53935', label: 'Überflurhydrant',    labelShort: 'Überflur H.' },
+  GH: { color: '#43A047', label: 'Fallmantelhydrant',  labelShort: 'Fallmantel H.' },
+  TWB: { color: '#FB8C00', label: 'Trinkwasserbrunnen', labelShort: 'Trinkwasser B.' },
 };
 
 /** Haversine distance in metres. */

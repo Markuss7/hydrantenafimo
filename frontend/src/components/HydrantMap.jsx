@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -8,7 +8,7 @@ import {
   useMap,
 } from 'react-leaflet';
 import L from 'leaflet';
-import { TYPE_CONFIG } from '../utils';
+import { TYPE_CONFIG, haversine } from '../utils';
 
 /* ─── Default centre: Altenfurt/Moorenbrunn ─── */
 const DEFAULT_CENTER = [49.405, 11.178];
@@ -22,6 +22,11 @@ function MapController({ mapRef }) {
   const map = useMap();
   useEffect(() => {
     mapRef.current = map;
+    // Fix gray-tile bug on GitHub Pages: ensure Leaflet knows the true container size
+    requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+    const onResize = () => map.invalidateSize({ animate: false });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, [map, mapRef]);
   return null;
 }
@@ -245,6 +250,64 @@ function RingLabels({ position }) {
   return null;
 }
 
+/* ─── Dynamic invisible hit areas ───
+ * Expands each hydrant’s tap target until it would collide with
+ * the nearest neighbour’s hit area. Visual size is unchanged.
+ */
+function HydrantHitAreas({ hydrants, onHydrantSelect }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(() => map.getZoom());
+
+  useEffect(() => {
+    const onZoom = () => setZoom(map.getZoom());
+    map.on('zoomend', onZoom);
+    return () => map.off('zoomend', onZoom);
+  }, [map]);
+
+  // Nearest-neighbour distance in metres per hydrant (recomputes only when visible set changes)
+  const nearestDists = useMemo(() => {
+    if (hydrants.length <= 1) return hydrants.map(() => 150);
+    return hydrants.map((h) => {
+      let min = Infinity;
+      for (const other of hydrants) {
+        if (other.id === h.id) continue;
+        const d = haversine(h.latitude, h.longitude, other.latitude, other.longitude);
+        if (d < min) min = d;
+      }
+      return min;
+    });
+  }, [hydrants]);
+
+  // Metres per pixel at current zoom (Nürnberg latitude ≈ 49.4°)
+  const mpp = (40075016.686 * Math.cos(49.4 * Math.PI / 180)) / (256 * Math.pow(2, zoom));
+
+  return (
+    <>
+      {hydrants.map((h, i) => {
+        const halfNeighborPx = nearestDists[i] / mpp / 2;
+        const minHit = zoom >= 16 ? 14 : 9;
+        const maxHit = zoom >= 18 ? 44 : zoom >= 17 ? 36 : zoom >= 16 ? 26 : 16;
+        const hitRadius = Math.min(maxHit, Math.max(minHit, Math.floor(halfNeighborPx)));
+        return (
+          <CircleMarker
+            key={`hit-${h.id}`}
+            center={[h.latitude, h.longitude]}
+            radius={hitRadius}
+            pathOptions={{
+              fillColor: '#000',
+              fillOpacity: 0.001, // near-zero but allows SVG pointer events
+              color: 'transparent',
+              opacity: 0,
+              weight: 0,
+            }}
+            eventHandlers={{ click: () => onHydrantSelect?.(h) }}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 /* ─── Main HydrantMap component ─── */
 export default function HydrantMap({
   hydrants,
@@ -369,6 +432,9 @@ export default function HydrantMap({
           />
         </>
       )}
+
+      {/* Dynamic hit areas (invisible, on top of visual circles for accurate touch targets) */}
+      <HydrantHitAreas hydrants={filteredHydrants} onHydrantSelect={onHydrantSelect} />
 
       {/* GPS position elements */}
       <GpsPulse position={gpsPosition} />

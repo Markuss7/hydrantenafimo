@@ -14,7 +14,9 @@ export default function FooterCard({
   const dragStartY = useRef(null);
   const cardRef = useRef(null);
   const addressRef = useRef(null);
+  const titleRef = useRef(null);
   const [collapsedMinHeight, setCollapsedMinHeight] = useState(null);
+  const [useShortLabel, setUseShortLabel] = useState(false);
 
   useLayoutEffect(() => {
     const addr = addressRef.current;
@@ -29,6 +31,22 @@ export default function FooterCard({
     const ro = new ResizeObserver(measure);
     ro.observe(addr);
     ro.observe(card);
+    return () => ro.disconnect();
+  }, [hydrant]);
+
+  // Detect if the full type label overflows into the metric chip, switch to short label
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const check = () => {
+      el.style.whiteSpace = 'nowrap';
+      const overflows = el.scrollWidth > el.clientWidth;
+      el.style.whiteSpace = '';
+      setUseShortLabel(overflows);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el.parentElement || el);
     return () => ro.disconnect();
   }, [hydrant]);
 
@@ -141,8 +159,8 @@ export default function FooterCard({
       <div className="footer-content">
         <div className="footer-left">
           <div className="footer-caption">Nächster Hydrant</div>
-          <div className={`footer-title ${hydrant.typ.toLowerCase()}`}>
-            {cfg.label}
+          <div className={`footer-title ${hydrant.typ.toLowerCase()}`} ref={titleRef}>
+            {useShortLabel ? cfg.labelShort : cfg.label}
           </div>
           <div className="footer-address" ref={addressRef}>{addr || '—'}</div>
         </div>
