@@ -185,7 +185,7 @@ function App() {
       return;
     }
 
-    const topInset = 164;
+    const topInset = 80; // was: 164 (with TopSearchBar)
     const predictedBottomInset = options.openSheet
       ? Math.max(sheetVisibleHeight, isSheetExpanded ? 340 : 220)
       : isFooterOpen
@@ -247,7 +247,7 @@ function App() {
 
   // Soft-hide zoom controls when bottom sheet pushes them into filter/search area
   // Layout heights: rings-toggle 56px + gap 10px + zoom 113px = 179px total
-  const FILTER_BAR_BOTTOM = 152; // approx bottom of filter pill bar from screen top
+  const FILTER_BAR_BOTTOM = 66; // approx bottom of filter pill bar from screen top (was: 152 with TopSearchBar)
   const ringsHidden = (screenHeight - zoomBottom - 179) < FILTER_BAR_BOTTOM;
   const zoomHidden  = (screenHeight - zoomBottom - 113) < FILTER_BAR_BOTTOM;
 
@@ -265,7 +265,7 @@ function App() {
         onHydrantSelect={handleHydrantSelect}
       />
 
-      <TopSearchBar />
+      {/* <TopSearchBar /> */}
       <FilterBar activeFilter={activeFilter} onChange={setActiveFilter} />
       <VersionBadge />
       <ZoomControls

@@ -43,7 +43,7 @@ html, body, #root {
 /* ─── Filter Pill Bar ─── */
 .pill-bar {
   position: absolute;
-  top: 88px;
+  top: 20px; /* was: 88px (with TopSearchBar above) */
   left: 20px;
   right: 20px;
   z-index: 2000;
@@ -536,7 +536,7 @@ html, body, #root {
   }
 
   .pill-bar {
-    top: 78px;
+    top: 14px; /* was: 78px (with TopSearchBar above) */
     left: 12px;
     right: 12px;
     gap: 8px;

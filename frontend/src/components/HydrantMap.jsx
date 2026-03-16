@@ -29,36 +29,89 @@ function MapController({ mapRef }) {
 /* ─── Heading cone as a DivIcon overlay ─── */
 function HeadingCone({ position, heading }) {
   const map = useMap();
+  const markerRef = useRef(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+    };
+  }, [map]);
 
   useEffect(() => {
-    if (!position || heading == null) return;
+    if (!position || heading == null) {
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+      return;
+    }
+
+    const S = 300, H = 150;           // SVG size & centre
+    const spread = 82;                 // half-width of cone at far edge (~60° opening)
+    const topY = 8;
+    const leftX = H - spread;
+    const rightX = H + spread;
+    // Arc radius: distance from centre to cone corner
+    const r = Math.hypot(H - leftX, H - topY).toFixed(1);
+
+    const html = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}"
+        style="display:block;transform:rotate(${heading}deg);transform-origin:center;">
+  <defs>
+    <linearGradient id="hcgrad" gradientUnits="userSpaceOnUse" x1="${H}" y1="${H}" x2="${H}" y2="${topY}">
+      <stop offset="0%"   stop-color="#1A73E8" stop-opacity="0.0"/>
+      <stop offset="28%"  stop-color="#1A73E8" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#1A73E8" stop-opacity="0.65"/>
+    </linearGradient>
+    <filter id="hcarrow-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="1" stdDeviation="3" flood-color="rgba(0,0,0,0.5)"/>
+    </filter>
+  </defs>
+
+  <!-- Cone body (arc-capped) -->
+  <path d="M${H},${H} L${leftX},${topY} A${r},${r} 0 0,1 ${rightX},${topY} Z"
+        fill="url(#hcgrad)"/>
+
+  <!-- Cone edge lines -->
+  <line x1="${H}" y1="${H}" x2="${leftX}" y2="${topY}"
+        stroke="#1A73E8" stroke-opacity="0.55" stroke-width="2"/>
+  <line x1="${H}" y1="${H}" x2="${rightX}" y2="${topY}"
+        stroke="#1A73E8" stroke-opacity="0.55" stroke-width="2"/>
+
+  <!-- Arc cap -->
+  <path d="M${leftX},${topY} A${r},${r} 0 0,1 ${rightX},${topY}"
+        stroke="#1A73E8" stroke-opacity="0.65" stroke-width="2.5" fill="none"
+        stroke-linecap="round"/>
+
+  <!-- Arrowhead – prominent, white-outlined, with shadow -->
+  <polygon points="${H},2 ${H - 18},32 ${H + 18},32"
+           fill="#1A73E8" stroke="white" stroke-width="4"
+           stroke-linejoin="round" filter="url(#hcarrow-shadow)">
+    <animate attributeName="opacity" values="1;0.65;1" dur="1.8s" repeatCount="indefinite"/>
+  </polygon>
+</svg>`;
 
     const icon = L.divIcon({
       className: '',
-      iconSize: [180, 180],
-      iconAnchor: [90, 90],
-      html: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" style="display:block;background:transparent;transform:rotate(${heading}deg);transform-origin:center;">
-        <defs>
-          <linearGradient id="hcg" gradientUnits="userSpaceOnUse" x1="90" y1="90" x2="90" y2="6">
-            <stop offset="0%"   stop-color="#1A73E8" stop-opacity="0.0"/>
-            <stop offset="35%"  stop-color="#1A73E8" stop-opacity="0.35"/>
-            <stop offset="100%" stop-color="#1A73E8" stop-opacity="0.70"/>
-          </linearGradient>
-        </defs>
-        <path d="M90,90 L34,6 L146,6 Z" fill="url(#hcg)" stroke="#1A73E8" stroke-opacity="0.35" stroke-width="1" stroke-linejoin="round"/>
-        <polygon points="90,2 80,22 100,22" fill="#1A73E8" opacity="0.9"/>
-      </svg>`,
+      iconSize: [S, S],
+      iconAnchor: [H, H],
+      html,
     });
 
-    const marker = L.marker([position.lat, position.lng], {
-      icon,
-      interactive: false,
-      zIndexOffset: -100,
-    }).addTo(map);
-
-    return () => {
-      map.removeLayer(marker);
-    };
+    // Reuse existing marker to avoid flicker on heading updates
+    if (markerRef.current) {
+      markerRef.current.setIcon(icon);
+      markerRef.current.setLatLng([position.lat, position.lng]);
+    } else {
+      markerRef.current = L.marker([position.lat, position.lng], {
+        icon,
+        interactive: false,
+        zIndexOffset: -100,
+      }).addTo(map);
+    }
   }, [map, position, heading]);
 
   return null;
@@ -113,12 +166,12 @@ function GpsDot({ position }) {
       {/* Blue dot */}
       <CircleMarker
         center={[position.lat, position.lng]}
-        radius={12}
+        radius={14}
         pathOptions={{
           fillColor: '#1A73E8',
           fillOpacity: 1,
           color: '#fff',
-          weight: 3,
+          weight: 4,
           opacity: 1,
         }}
       />

@@ -1,12 +1,14 @@
 export default function GpsFab({ hasFix, onClick, bottom }) {
   return (
     <div className="gps-fab-wrapper" style={bottom != null ? { bottom } : undefined}>
+      {/* Einsatzort-Punkt (temporarily hidden):
       <div className="gps-secondary-wrap" aria-hidden="true">
         <button className="gps-fab-secondary" tabIndex={-1}>
           <span className="gps-fab-secondary-dot" />
         </button>
         <span className="gps-fab-secondary-label">Einsatzort</span>
       </div>
+      */}
 
       <button
         className={`gps-fab ${hasFix ? '' : 'disabled'}`}
